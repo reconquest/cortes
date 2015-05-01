@@ -29,7 +29,7 @@ class Context:
 
             return result
 
-class Seeker:
+class Sneaker:
     def __init__(self, line, column):
         self.line = line
         self.column = column
@@ -38,14 +38,12 @@ class Seeker:
         symbol = self.get_symbol_at_cursor()
 
 
-class LeftSeeker(Seeker):
+class LeftSneaker(Sneaker):
     def get_symbol_at_cursor(self):
         #not implemented
 
 
-
-
-class Right Seeker(Seeker):
+class RightSneaker(Sneaker):
     def Move():
         self.column += 1
 
@@ -53,12 +51,39 @@ class Right Seeker(Seeker):
 def extract(buffer, cursor):
     line, column = cursor
 
-    stack = []
-    stack.append(create_seekers(line, column))
+    sneakers_stack = []
+    sneakers_stack.append(create_sneakers(line, column))
     while True:
-        left, right = stack.pop()
+        sneakers = sneakers_stack[-1]
+
+        move_sneakers(sneakers, sneakers_stack)
 
 
-# returns left and right seekers by line and column.
-def create_seekers(line, column):
-    return (Seeker(line, column), Seeker(line, column))
+def move_sneakers(sneakers, sneakers_stack):
+    sneaker_moved = False
+
+    for sneaker in sneakers:
+        if sneaker.move():
+            sneaker_moved = True
+
+    if not sneaker_moved:
+        create_context(sneakers)
+        update_sneakers_stack(sneakers, sneakers_stack)
+
+
+def update_sneakers_stack(sneakers, sneakers_stack):
+    sneakers_stack.pop()
+    for sneaker in sneakers:
+        if not sneaker.should_create_new_sneakers():
+            continue
+        line, column = sneaker.get_cursor_for_new_sneakers()
+        new_sneakers = create_sneakers(
+            line,
+            column
+        )
+
+        sneakers_stack.append(new_sneakers)
+
+
+def create_sneakers(line, column):
+    return (LeftSneaker(line, column), RightSneaker(line, column))
