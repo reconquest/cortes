@@ -2,88 +2,55 @@
 
 import re
 
-word_re = re.compile(r'\w')
-
-class Context:
-    def __init__(self, buffer, start, end):
-        self.buffer = buffer
-        self.start = start
-        self.end = end
-
-    def __str__(self):
-        result = ""
-        line, column = 0, 0
-
-        for buffer_line in self.buffer:
-            for char in buffer_line:
-                if (line, column) == self.start:
-                    result += "["
-
-                result += char
-
-                if (line, column) == self.end:
-                    result += "]"
-
-                column += 1
-            line += 1
-
-            return result
-
-class Sneaker:
-    def __init__(self, line, column):
-        self.line = line
-        self.column = column
-
-    def get_weight(self):
-        symbol = self.get_symbol_at_cursor()
-
-
-class LeftSneaker(Sneaker):
-    def get_symbol_at_cursor(self):
-        #not implemented
-
-
-class RightSneaker(Sneaker):
-    def Move():
-        self.column += 1
-
+import sneakers
+import context
 
 def extract(buffer, cursor):
     line, column = cursor
 
     sneakers_stack = []
-    sneakers_stack.append(create_sneakers(line, column))
+    sneakers_stack.append(Sneakers(line, column))
+
+    parent_sneakers = None
     while True:
         sneakers = sneakers_stack[-1]
+
+        if parent_sneakers:
+            if sneakers.get_identifier() != parent_sneakers.get_identifier())
+                update_sneakers_positions(sneakers, parent_sneakers)
+                parent_sneakers = sneakers
+        else:
+            parent_sneakers = sneakers
 
         move_sneakers(sneakers, sneakers_stack)
 
 
+def update_sneakers_positions(sneakers, parent_sneakers):
+    left_position, right_position = parent_sneakers.get_positions()
+    sneakers.set_positions(left_position, right_position)
+
+
 def move_sneakers(sneakers, sneakers_stack):
-    sneaker_moved = False
+    need_create_sneakers, can_move_more = sneakers.move()
 
-    for sneaker in sneakers:
-        if sneaker.move():
-            sneaker_moved = True
+    if need_create_sneakers:
+        create_new_sneakers(sneakers, sneakers_stack)
 
-    if not sneaker_moved:
+    if not can_move_more:
         create_context(sneakers)
-        update_sneakers_stack(sneakers, sneakers_stack)
+        sneakers_stack.pop()
 
+def create_new_sneakers(sneakers, sneakers_stack):
+    pass
+    #sneakers_stack.pop()
 
-def update_sneakers_stack(sneakers, sneakers_stack):
-    sneakers_stack.pop()
-    for sneaker in sneakers:
-        if not sneaker.should_create_new_sneakers():
-            continue
-        line, column = sneaker.get_cursor_for_new_sneakers()
-        new_sneakers = create_sneakers(
-            line,
-            column
-        )
+    #for sneaker in sneakers:
+        #if not sneaker.should_create_sneakers():
+            #continue
+        #line, column = sneaker.get_cursor_for_new_sneakers()
+        #new_sneakers = create_sneakers(
+            #line,
+            #column
+        #)
 
-        sneakers_stack.append(new_sneakers)
-
-
-def create_sneakers(line, column):
-    return (LeftSneaker(line, column), RightSneaker(line, column))
+        #sneakers_stack.append(new_sneakers)
