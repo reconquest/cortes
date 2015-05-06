@@ -2,21 +2,21 @@
 
 import re
 
-import sneakers
+from sneakers import *
 import context
 
 def extract(buffer, cursor):
     line, column = cursor
 
     sneakers_stack = []
-    sneakers_stack.append(Sneakers(line, column))
+    sneakers_stack.append(Sneakers(buffer, line, column, None))
 
     parent_sneakers = None
     while True:
         sneakers = sneakers_stack[-1]
 
         if parent_sneakers:
-            if sneakers.get_identifier() != parent_sneakers.get_identifier())
+            if sneakers.get_identifier() != parent_sneakers.get_identifier():
                 update_sneakers_positions(sneakers, parent_sneakers)
                 parent_sneakers = sneakers
         else:
@@ -40,17 +40,10 @@ def move_sneakers(sneakers, sneakers_stack):
         create_context(sneakers)
         sneakers_stack.pop()
 
+
 def create_new_sneakers(sneakers, sneakers_stack):
-    pass
-    #sneakers_stack.pop()
-
-    #for sneaker in sneakers:
-        #if not sneaker.should_create_sneakers():
-            #continue
-        #line, column = sneaker.get_cursor_for_new_sneakers()
-        #new_sneakers = create_sneakers(
-            #line,
-            #column
-        #)
-
-        #sneakers_stack.append(new_sneakers)
+    buffer = sneakers.get_buffer()
+    line, column = sneakers.get_position_for_new_sneakers()
+    motion = sneakers.get_motion_for_new_sneakers()
+    new_sneakers = Sneakers(buffer, line, column, motion)
+    sneakers_stack.append(new_sneakers)
