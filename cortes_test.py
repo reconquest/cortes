@@ -10,17 +10,17 @@ class BasicTestCase(unittest.TestCase):
             "[bar]"
         )
 
-    def testIdentifierWithSpaces(self):
-        self.assertEqual(
-            str(cortes.extract([" bar "], (0, 1))),
-            " [bar] "
-        )
+    # def testIdentifierWithSpaces(self):
+        # self.assertEqual(
+            # str(cortes.extract([" bar "], (0, 1))),
+            # " [bar] "
+        # )
 
-    def testTwoIdentifiers(self):
-        self.assertEqual(
-            str(cortes.extract(["bar baz"], (0, 1))),
-            "[[bar] [baz]]"
-        )
+    # def testTwoIdentifiers(self):
+        # self.assertEqual(
+            # str(cortes.extract(["bar baz"], (0, 1))),
+            # "[[bar] [baz]]"
+        # )
 
 
 if __name__ == '__main__':

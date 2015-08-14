@@ -1,5 +1,9 @@
 import re
 
+LEFT_MOTION = -1
+RIGHT_MOTION = 1
+NEUTRAL_MOTION = 0
+
 class Sneakers:
     def get_identifier(self):
         return self._identifier;
@@ -27,6 +31,42 @@ class Sneakers:
         return (self._left.get_positions(), self._left.right_positions())
 
 
+    def get_cursor_for_new_sneakers(self):
+        left_next_position = self._left.get_next_position()
+        if self._motion == LEFT_MOTION:
+            return left_next_position, LEFT_MOTION
+
+        right_next_position = self._right.get_next_position()
+        if self._motion == RIGHT_MOTION:
+            return right_next_position, RIGHT_MOTION
+
+        left_line_changed = True
+        if left_next_position:
+            print "sneakers.py:45 left get"
+            _, _, left_line_changed = left_next_position
+
+        right_line_changed = True
+        if right_next_position:
+            print "sneakers.py:50 right get"
+            _, _, right_line_changed = right_next_position
+
+        print "sneakers.py:51 left_line_changed: %s" % left_line_changed
+        print "sneakers.py:51 right_line_changed: %s" % right_line_changed
+
+
+
+        if left_line_changed and not right_line_changed:
+            if right_position:
+                return right_next_position, RIGHT_MOTION
+            else:
+                return left_next_position, LEFT_MOTION
+
+        if left_next_position:
+            return left_next_position, LEFT_MOTION
+        else:
+            return right_next_position, RIGHT_MOTION
+
+
     def set_positions(self, left_position, right_position):
         self._left.set_position(left_position)
         self._right.set_position(right_position)
@@ -36,12 +76,15 @@ class Sneakers:
         left_priority = self._left.get_priority()
         right_priority = self._right.get_priority()
 
-        if left_priority >= right_priority:
-            greater = self._left
-            less = self._right
-        else:
+        print "sneakers.py:39 left_priority: %s" % left_priority
+        print "sneakers.py:39 right_priority: %s" % right_priority
+
+        if right_priority >= left_priority:
             greater = self._right
             less = self._left
+        else:
+            greater = self._left
+            less = self._right
 
         sneaker_moved = False
         can_move_more = False
@@ -103,14 +146,27 @@ class Sneaker:
 
         line_contents = self._buffer[line]
         if column < 0:
-            line = line - 1
+            next_line = line - 1
         elif column >= len(line_contents):
-            line = line + 1
+            next_line = line + 1
+        else:
+            next_line = line
 
-        if line < 0 or line >= len(self._buffer):
+        if next_line < 0 or next_line >= len(self._buffer):
             return None
 
-        return line, column
+        line_changed = False
+        next_line_contents = self._buffer[next_line]
+        if column < 0:
+            next_column = len(next_line_contents) - 1
+            line_changed = True
+        elif column >= len(line_contents):
+            next_column = 0
+            line_changed = True
+        else:
+            next_column = column
+
+        return (next_line, next_column, line_changed)
 
 
     def get_symbol_at_cursor(self):
@@ -118,16 +174,31 @@ class Sneaker:
 
 
     def move(self):
+        """ sneaker_moved, need_create_sneakers_greater """
         next_position = self.get_next_position()
+
         if not next_position:
             return False, True
 
-        next_line, next_column = next_position
+        print "sneakers.py:125 next_position[0]: %s" % next_position[0]
+        print "sneakers.py:126 next_position[1]: %s" % next_position[1]
+
+        next_line, next_column, motion = next_position
         next_symbol = self._buffer[next_line][next_column]
+
+        print "sneakers.py:134 next_symbol: %s" % next_symbol
+
+
         current_symbol = self.get_symbol_at_cursor()
 
         next_word = RE_WORD.match(next_symbol)
         current_word = RE_WORD.match(current_symbol)
+        print "sneakers.py:141 next_word: %s" % next_word
+        print "sneakers.py:142 current_word: %s" % current_word
+
+        self._line = next_line
+        self._column = next_column
+
         if current_word and next_word:
             return True, False
 
@@ -139,8 +210,6 @@ class Sneaker:
 
         if not current_word and next_word:
             return True, True
-
-
 
 
 class LeftSneaker(Sneaker):
